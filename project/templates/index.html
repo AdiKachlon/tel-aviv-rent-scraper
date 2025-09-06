@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <title>הערכת שכר דירה</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    :root{
+      --bg:#f7f7fb; --card:#fff; --border:#e6e6ee; --text:#131722;
+      --muted:#6b7280; --accent:#3a72ff; --accent-ink:#fff;
+      --gap:16px; --radius:16px; --field-w:380px; --shadow:0 8px 30px rgba(0,0,0,.06);
+    }
+    body{ margin:0; background:var(--bg); font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif; color:var(--text); }
+    .wrap{ max-width:1100px; margin:48px auto; padding:0 16px; }
+    .card{ background:#fff; border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:28px; }
+    h1{ margin:0 0 6px; font-size:1.8rem; font-weight:800; text-align:center; }
+    .tagline{ margin:0 22px 22px; color:var(--muted); font-size:.95rem; text-align:center; }
+    .grid{ display:grid; grid-template-columns: repeat(2, var(--field-w)); gap:var(--gap); justify-content:center; }
+    @media (max-width:860px){ .grid{ grid-template-columns: var(--field-w); } }
+    .field{ width:var(--field-w); display:flex; flex-direction:column; gap:8px; }
+    label{ font-weight:700; font-size:.95rem; }
+    .req{ color:#e11d48; font-weight:900; }
+    input,select,button{ width:100%; height:44px; padding:10px 12px; border-radius:12px; border:1px solid #cfd1d7; background:#fff; font-size:1rem; outline:none; transition: box-shadow .15s, border-color .15s; }
+    input:focus,select:focus{ border-color:#b7c7ff; box-shadow:0 0 0 3px rgba(58,114,255,.12); }
+    select{ appearance:auto; background:#fff; }
+    .section-title{ margin:18px 0 6px; text-align:center; color:#374151; font-weight:800; }
+    .checks{ margin-top:8px; display:grid; gap:var(--gap); grid-template-columns: repeat(2, var(--field-w)); justify-content:center; }
+    @media (max-width:860px){ .checks{ grid-template-columns: var(--field-w); } }
+    .check{ width:var(--field-w); height:44px; display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid #cfd1d7; border-radius:12px; background:#fff; user-select:none; cursor:pointer; }
+    .check input{ width:auto; height:auto; }
+    .actions{ display:flex; justify-content:center; margin-top:10px; }
+    button{ width:var(--field-w); padding:12px 14px; font-weight:800; letter-spacing:.3px; color:var(--accent-ink); background:var(--accent); border:none; cursor:pointer; }
+    button:hover{ filter:brightness(.96); }
+    .helper{ text-align:center; color:var(--muted); font-size:.9rem; margin-top:8px; }
+    .result{ width:var(--field-w); margin:16px auto 0; padding:12px; border-radius:12px; background:#f0fff4; color:#0a7a57; font-weight:900; text-align:center; border:1px solid #d5f2e3; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>הערכת שכר דירה</h1>
+
+      {% set ptype = form_values.get('property_type','') %}
+      <form method="post" action="/estimate" novalidate>
+        <div class="grid">
+          <div class="field">
+            <label for="city">עיר</label>
+            <input id="city" name="city" placeholder="לדוגמה: תל אביב" value="{{ form_values.get('city','') }}">
+          </div>
+
+          <div class="field">
+            <label for="neighborhood">שכונה</label>
+            <input id="neighborhood" name="neighborhood" placeholder="רשות" value="{{ form_values.get('neighborhood','') }}">
+          </div>
+
+          <div class="field">
+            <label for="property_type">סוג נכס</label>
+            <select id="property_type" name="property_type">
+              <option value="" {% if ptype=='' %}selected{% endif %}>—</option>
+              <option value="apartment" {% if ptype=='apartment' %}selected{% endif %}>דירה</option>
+              <option value="studio" {% if ptype=='studio' %}selected{% endif %}>סטודיו</option>
+              <option value="garden_apartment" {% if ptype=='garden_apartment' %}selected{% endif %}>דירת גן</option>
+              <option value="duplex" {% if ptype=='duplex' %}selected{% endif %}>דופלקס</option>
+              <option value="penthouse" {% if ptype=='penthouse' %}selected{% endif %}>פנטהאוז</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="area">מ״ר</label>
+            <input id="area" name="area" type="number" step="0.1" min="0" placeholder="רשות" value="{{ form_values.get('area','') }}">
+          </div>
+
+          <div class="field">
+            <label for="floor">קומה</label>
+            <input id="floor" name="floor" type="number" step="1" min="-3" placeholder="רשות" value="{{ form_values.get('floor','') }}">
+          </div>
+
+          <div class="field">
+            <label for="rooms">מספר חדרים <span class="req">*</span></label>
+            <input id="rooms" name="rooms" type="number" step="0.5" min="0.5" required value="{{ form_values.get('rooms','') }}">
+          </div>
+        </div>
+
+        <div class="section-title">תוספות</div>
+        <div class="checks">
+          <label class="check"><input type="checkbox" name="elevator"   {% if form_values.get('elevator') %}checked{% endif %}> מעלית</label>
+          <label class="check"><input type="checkbox" name="ac"         {% if form_values.get('ac') %}checked{% endif %}> מזגן</label>
+          <label class="check"><input type="checkbox" name="parking"    {% if form_values.get('parking') %}checked{% endif %}> חניה</label>
+          <label class="check"><input type="checkbox" name="balcony"    {% if form_values.get('balcony') %}checked{% endif %}> מרפסת</label>
+          <label class="check"><input type="checkbox" name="mamad"      {% if form_values.get('mamad') %}checked{% endif %}> ממ״ד</label>
+          <label class="check"><input type="checkbox" name="renovated"  {% if form_values.get('renovated') %}checked{% endif %}> משופצת</label>
+          <label class="check"><input type="checkbox" name="furnished"  {% if form_values.get('furnished') %}checked{% endif %}> מרוהטת</label>
+          <label class="check"><input type="checkbox" name="storage"    {% if form_values.get('storage') %}checked{% endif %}> מחסן</label>
+          <label class="check"><input type="checkbox" name="accessible" {% if form_values.get('accessible') %}checked{% endif %}> נגישות</label>
+          <label class="check"><input type="checkbox" name="bars"       {% if form_values.get('bars') %}checked{% endif %}> סורגים</label>
+        </div>
+
+        <div class="actions">
+          <button type="submit">הערך שכר דירה</button>
+        </div>
+        <p class="helper"><span class="req">*</span> שדה חובה</p>
+      </form>
+
+      {% if prediction is not none %}
+        <div class="result">המחיר המשוער: {{ prediction }}</div>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>
